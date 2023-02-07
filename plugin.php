@@ -17,14 +17,30 @@ if ( ! defined( 'WPINC' ) ) {
 }
 
 /**
- * Currently plugin version.
+ * Plugin constants.
  */
 define( 'WP_OPERAIONAL_STATUS_VERSION', '0.1.0' );
+define( 'WP_OPERAIONAL_STATUS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'WP_OPERAIONAL_STATUS_DB_TABLE', 'operational_status_log' );
 
 /**
- * Plugin directory path
+ * The code that runs during plugin activation.
  */
-define( 'WP_OPERAIONAL_STATUS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+function activate_wp_operational_status() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-operational-status-activate.php';
+	WP_Operational_Status_Activate::activate();
+}
+
+/**
+ * The code that runs during plugin deactivation.
+ */
+function deactivate_wp_operational_status() {
+	require_once plugin_dir_path( __FILE__ ) . 'includes/class-wp-operational-status-deactivate.php';
+	WP_Operational_Status_Deactivate::deactivate();
+}
+
+register_activation_hook( __FILE__, 'activate_wp_operational_status' );
+register_deactivation_hook( __FILE__, 'deactivate_wp_operational_status' );
 
 /**
  * The core plugin class that is used to define internationalization,
@@ -40,9 +56,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-wp-operational-status.php'
  * not affect the page life cycle.
  */
 function run_wp_operational_status() {
-
 	$plugin = new WP_Operational_Status();
 	$plugin->run();
-
 }
 run_wp_operational_status();
