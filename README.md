@@ -1,1 +1,1 @@
-# wp-operational-status
+# WP Operational Status
