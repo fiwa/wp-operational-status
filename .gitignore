@@ -2,7 +2,7 @@
 node_modules/
 
 # Composer dependency directories
-vendor/
+!vendor/
 
 # Log files and databases
 *.log
