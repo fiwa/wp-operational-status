@@ -7,7 +7,7 @@ class WP_Operational_Status_Helpers {
 		return carbon_get_theme_option( 'wpos_monitors' );
 	}
 
-	public static function get_operational_status_options() {
+	public static function get_operational_status_theme_settings() {
 		global $wpos_theme_settings;
 
 		if ( ! isset( $wpos_theme_settings[ 'monitors' ] ) ) {
@@ -17,11 +17,20 @@ class WP_Operational_Status_Helpers {
 		return $wpos_theme_settings;
 	}
 
-	public static function get_operational_status_logs() {
+	public static function get_operational_status_logs( $args = null ) {
 		global $wpdb;
 
+		$default_args = array(
+			'number_of_posts' => 10,
+		);
+		$args = wp_parse_args( $args, $default_args );
 		$wpdb->operational_status_log = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE;
 
-		return $wpdb->get_results( "SELECT * FROM $wpdb->operational_status_log ORDER BY id DESC LIMIT 10" );
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM $wpdb->operational_status_log ORDER BY id DESC LIMIT %d" ,
+				$args['number_of_posts']
+			)
+		);
 	}
 }
