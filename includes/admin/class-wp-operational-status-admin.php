@@ -6,6 +6,10 @@ use Carbon_Fields\Field;
 class WP_Operational_Status_Admin {
 	private $plugin_name;
 	private $version;
+	private $replacement_variables = array(
+		'current_user_capability' => 'manage_options',
+		'cron_schedule' => 'hourly',
+	);
 
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
@@ -18,10 +22,12 @@ class WP_Operational_Status_Admin {
 	}
 
 	public function add_plugin_settings_page() {
+		$current_user_capability = apply_filters( 'wpos_current_user_capability', $this->replacement_variables['current_user_capability'] );
+
 		$top_level_options_container = Container::make( 'theme_options', __( 'WP Operational Status', 'wp-operational-status' ) )
 			->set_page_file( 'wpos_settings' )
 			->set_icon( 'dashicons-megaphone' )
-			->where( 'current_user_capability', '=', 'manage_options' )
+			->where( 'current_user_capability', '=', $current_user_capability )
 			->add_fields( array(
 				Field::make( 'complex', 'wpos_monitors', __( 'Monitors', 'wp-operational-status' ) )
 					->set_layout( 'grid' )
@@ -51,12 +57,17 @@ class WP_Operational_Status_Admin {
 
 	public function register_cron_job() {
 		if ( ! wp_next_scheduled( 'wp_operational_status_refresh' ) ) {
-			wp_schedule_event( time(), 'daily', 'wp_operational_status_refresh' );
+			$cron_schedule = apply_filters( 'wpos_cron_schedule', $this->replacement_variables['cron_schedule'] );
+
+			error_log($cron_schedule);
+
+			wp_schedule_event( time(), $cron_schedule, 'wp_operational_status_refresh' );
 		}
 	}
 
 	public function run_wp_operational_status_refresh() {
-		$monitors = WP_Operational_Status_Helpers::get_monitors();
+		$operational_status_theme_settings = WP_Operational_Status_Helpers::get_operational_status_theme_settings();
+		$monitors = $operational_status_theme_settings['monitors'];
 
 		if ( $monitors > 1 ) {
 			foreach ( $monitors as $monitor ) {
