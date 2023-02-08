@@ -1,12 +1,21 @@
 <?php
 
+/**
+ * Define the helper functionality.
+ */
 class WP_Operational_Status_Helpers {
 	private $wpos_theme_settings = array();
 
+	/**
+	 * Return monitors.
+	 */
 	public static function get_monitors() {
 		return carbon_get_theme_option( 'wpos_monitors' );
 	}
 
+	/**
+	 * Return plugin theme settings.
+	 */
 	public static function get_operational_status_theme_settings() {
 		global $wpos_theme_settings;
 
@@ -17,6 +26,11 @@ class WP_Operational_Status_Helpers {
 		return $wpos_theme_settings;
 	}
 
+	/**
+	 * Return log entries from the database.
+	 *
+	 * @param array $args.
+	 */
 	public static function get_operational_status_logs( $args = null ) {
 		global $wpdb;
 

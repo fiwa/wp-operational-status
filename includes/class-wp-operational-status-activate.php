@@ -1,24 +1,25 @@
 <?php
 
+/**
+ * Fired during plugin activation.
+ */
 class WP_Operational_Status_Activate {
-	public static function activate() {
+	public static function activate( $network_wide ) {
 		if ( is_multisite() && $network_wide ) {
-			$ms_sites = wp_get_sites();
-
-			if ( 0 < sizeof( $ms_sites ) ) {
-				foreach ( $ms_sites as $ms_site ) {
-					switch_to_blog( $ms_site['blog_id'] );
-					self::plugin_activated();
-				}
-			}
-
-			restore_current_blog();
+			wp_die(__('WP Operational Status: This plugin cannot be activated network wide.', 'wp-operational-status'));
 		} else {
 			self::plugin_activated();
 		}
 	}
 
 	public static function plugin_activated() {
+		self::create_log_table();
+	}
+
+	/**
+	 * Create the database log table.
+	 */
+	public static function create_log_table() {
 		global $wpdb;
 
 		$sql = array();

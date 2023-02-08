@@ -6,7 +6,18 @@ if ( ! defined( 'WP_OPERAIONAL_STATUS_VERSION' ) ) {
 	exit;
 }
 
+/**
+ * Register template functions for the plugin.
+ */
 if ( ! function_exists( 'wpos_get_monitors' ) ) {
+
+	/**
+	 * Get monitors and logs.
+	 *
+	 * @param array $args.
+	 *
+	 * @return array
+	 */
 	function wpos_get_monitors( $args = null ) {
 		$safe_args = null;
 		$default_args = array(

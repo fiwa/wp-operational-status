@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * The admin-specific functionality of the plugin.
+ */
+
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 
@@ -11,16 +15,29 @@ class WP_Operational_Status_Admin {
 		'cron_schedule' => 'hourly',
 	);
 
+	/**
+	 * Initialize the class and set its properties.
+	 */
 	public function __construct( $plugin_name, $version ) {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 	}
 
+	/**
+	 * Boot the Carbon Fields library.
+	 */
 	public function load_carbon_fields() {
 		require_once WP_OPERAIONAL_STATUS_PLUGIN_DIR . 'vendor/autoload.php';
 		\Carbon_Fields\Carbon_Fields::boot();
 	}
 
+	/**
+	 * Add plugin settings.
+	 *
+	 * Carbon Fields is used in order to register admin pages and fields.
+	 *
+	 * @link https://docs.carbonfields.net/learn/
+	 */
 	public function add_plugin_settings_page() {
 		$current_user_capability = apply_filters( 'wpos_current_user_capability', $this->replacement_variables['current_user_capability'] );
 
@@ -55,16 +72,20 @@ class WP_Operational_Status_Admin {
 			) );
 	}
 
+	/**
+	 * Register cron job.
+	 */
 	public function register_cron_job() {
 		if ( ! wp_next_scheduled( 'wp_operational_status_refresh' ) ) {
 			$cron_schedule = apply_filters( 'wpos_cron_schedule', $this->replacement_variables['cron_schedule'] );
-
-			error_log($cron_schedule);
 
 			wp_schedule_event( time(), $cron_schedule, 'wp_operational_status_refresh' );
 		}
 	}
 
+	/**
+	 * Run cron job.
+	 */
 	public function run_wp_operational_status_refresh() {
 		$operational_status_theme_settings = WP_Operational_Status_Helpers::get_operational_status_theme_settings();
 		$monitors = $operational_status_theme_settings['monitors'];
@@ -82,6 +103,9 @@ class WP_Operational_Status_Admin {
 		}
 	}
 
+	/**
+	 * Write status to log table.
+	 */
 	public function write_to_log( $monitor = array(), $status = 0 ) {
 		if ( ! is_array( $monitor ) ) {
 			return false;
@@ -104,6 +128,14 @@ class WP_Operational_Status_Admin {
 		);
 	}
 
+	/**
+	 * Ping external URL.
+	 *
+	 * @param string $url URL to ping.
+	 * @param int    $valid_response_code Valid response code.
+	 *
+	 * @return bool
+	 */
 	public function ping_external_url( $url = null, $valid_response_code = 200 ) {
 		if ( ! $url ) {
 			return false;
