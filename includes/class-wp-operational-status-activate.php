@@ -13,6 +13,8 @@ class WP_Operational_Status_Activate {
 	}
 
 	public static function plugin_activated() {
+		add_option( 'wpos_cron_last_run', '' , '', 'no' );
+
 		self::create_log_table();
 	}
 
@@ -23,12 +25,22 @@ class WP_Operational_Status_Activate {
 		global $wpdb;
 
 		$sql = array();
-		$wpdb->operational_status_log = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE;
+		$wpdb->operational_status_monitors = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_monitors';
+		$wpdb->operational_status_log = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_log';
 		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql[] = "CREATE TABLE IF NOT EXISTS $wpdb->operational_status_monitors (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			url varchar(255) NOT NULL,
+			name varchar(255) NOT NULL,
+			response_code varchar(255) NOT NULL,
+			date_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			PRIMARY KEY  (id)
+		) $charset_collate;";
 
 		$sql[] = "CREATE TABLE IF NOT EXISTS $wpdb->operational_status_log (
 			id bigint(20) NOT NULL AUTO_INCREMENT,
-			monitor_url varchar(255) NOT NULL,
+			monitor_id bigint(20) NOT NULL,
 			date_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			status varchar(255) NOT NULL,
 			PRIMARY KEY  (id)

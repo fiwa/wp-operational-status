@@ -6,13 +6,15 @@
 class WP_Operational_Status_Public {
 	private $plugin_name;
 	private $version;
+	private $replacement_variables;
 
 	/**
 	 * Initialize the class and set its properties.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name, $version, $replacement_variables ) {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		$this->replacement_variables = $replacement_variables;
 	}
 
 	/**

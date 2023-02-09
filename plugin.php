@@ -21,7 +21,8 @@ if ( ! defined( 'WPINC' ) ) {
  */
 define( 'WP_OPERAIONAL_STATUS_VERSION', '0.1.0' );
 define( 'WP_OPERAIONAL_STATUS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'WP_OPERAIONAL_STATUS_DB_TABLE', 'operational_status_log' );
+define( 'WP_OPERAIONAL_STATUS_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
+define( 'WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX', 'operational_status' );
 
 /**
  * The code that runs during plugin activation.
