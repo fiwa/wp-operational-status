@@ -7,6 +7,7 @@ class WP_Operational_Status {
 	protected $loader;
 	protected $plugin_name;
 	protected $version;
+	protected $replacement_variables;
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -14,6 +15,10 @@ class WP_Operational_Status {
 	public function __construct() {
 		$this->version = WP_OPERAIONAL_STATUS_VERSION;
 		$this->plugin_name = 'wp-operational-status';
+		$this->replacement_variables = array(
+			'current_user_capability' => 'manage_options',
+			'cron_schedule' => 'hourly',
+		);
 
 		$this->load_dependencies();
 		$this->set_locale();
@@ -52,7 +57,7 @@ class WP_Operational_Status {
 	 * of the plugin.
 	 */
 	private function define_admin_hooks() {
-		$plugin_admin = new WP_Operational_Status_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new WP_Operational_Status_Admin( $this->get_plugin_name(), $this->get_version(), $this->get_replacement_variables() );
 
 		$this->loader->add_action( 'init', $plugin_admin, 'register_cron_job' );
 		$this->loader->add_action( 'wp_operational_status_refresh', $plugin_admin, 'run_wp_operational_status_refresh' );
@@ -66,7 +71,7 @@ class WP_Operational_Status {
 	 * of the plugin.
 	 */
 	private function define_public_hooks() {
-		$plugin_public = new WP_Operational_Status_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new WP_Operational_Status_Public( $this->get_plugin_name(), $this->get_version(), $this->get_replacement_variables() );
 
 		$this->loader->add_action( 'plugins_loaded', $plugin_public, 'load_template_functions' );
 	}
@@ -95,5 +100,9 @@ class WP_Operational_Status {
 
 	public function get_version() {
 		return $this->version;
+	}
+
+	public function get_replacement_variables() {
+		return $this->replacement_variables;
 	}
 }

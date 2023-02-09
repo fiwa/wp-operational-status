@@ -6,17 +6,15 @@
 class WP_Operational_Status_Admin {
 	private $plugin_name;
 	private $version;
-	private $replacement_variables = array(
-		'current_user_capability' => 'manage_options',
-		'cron_schedule' => 'hourly',
-	);
+	private $replacement_variables;
 
 	/**
 	 * Initialize the class and set its properties.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( $plugin_name, $version, $replacement_variables ) {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		$this->replacement_variables = $replacement_variables;
 	}
 
 	/**
@@ -37,7 +35,7 @@ class WP_Operational_Status_Admin {
 			__( 'Monitors', 'wp-operational-status' ),
 			$this->replacement_variables['current_user_capability'],
 			$this->plugin_name,
-			array( $this, 'output_existing_menu_sub_admin_page' )
+			array( $this, 'output_admin_page' )
 		);
 	}
 
@@ -71,6 +69,9 @@ class WP_Operational_Status_Admin {
 		}
 	}
 
+	/**
+	 * Plugin ajax.
+	 */
 	public function admin_actions_ajax() {
 		$output = array( 'error' =>  __( 'No actions specified', 'wp-operational-status' ) );
 
@@ -88,7 +89,7 @@ class WP_Operational_Status_Admin {
 					break;
 					case 'delete':
 						if ( wp_verify_nonce( $_POST['_ajax_nonce'], 'wp-operational-status-delete-monitor-' . intval( $_POST['id'] ) ) ) {
-							$output = $this->delete_add_monitor( $_POST );
+							$output = $this->process_delete_monitor( $_POST );
 						} else {
 							$output = $nonce_error;
 						}
@@ -101,7 +102,10 @@ class WP_Operational_Status_Admin {
 		exit();
 	}
 
-	private function delete_add_monitor( $params ) {
+	/**
+	 * Process delete monitor.
+	 */
+	private function process_delete_monitor( $params ) {
 		global $wpdb;
 
 		$monitor = $this->get_monitor( $params['url'] );
@@ -120,6 +124,9 @@ class WP_Operational_Status_Admin {
 		}
 	}
 
+	/**
+	 * Process add monitor.
+	 */
 	private function process_add_monitor( $params ) {
 		global $wpdb;
 
@@ -194,12 +201,24 @@ class WP_Operational_Status_Admin {
 		return $output;
 	}
 
-	private function get_monitors() {
+	/**
+	 * Get monitors.
+	 *
+	 * @return object
+	 */
+	public static function get_monitors() {
 		global $wpdb;
 		$wpdb->operational_status_monitors = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_monitors';
 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->operational_status_monitors ORDER BY id DESC LIMIT %d", 10 ) );
 	}
 
+	/**
+	 * Get monitor.
+	 *
+	 * @param string $url Monitor URL.
+	 *
+	 * @return object
+	 */
 	private function get_monitor( $url ) {
 		global $wpdb;
 		$wpdb->operational_status_monitors = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_monitors';
@@ -214,6 +233,7 @@ class WP_Operational_Status_Admin {
 			$cron_schedule = apply_filters( 'wpos_cron_schedule', $this->replacement_variables['cron_schedule'] );
 
 			wp_schedule_event( time(), $cron_schedule, 'wp_operational_status_refresh' );
+
 		}
 	}
 
@@ -221,14 +241,13 @@ class WP_Operational_Status_Admin {
 	 * Run cron job.
 	 */
 	public function run_wp_operational_status_refresh() {
-		$operational_status_theme_settings = WP_Operational_Status_Helpers::get_operational_status_theme_settings();
-		$monitors = $operational_status_theme_settings['monitors'];
+		$monitors = $this->get_monitors();
+
+		update_option( 'wpos_cron_last_run', current_time( 'mysql', 1 ), false );
 
 		if ( $monitors > 1 ) {
 			foreach ( $monitors as $monitor ) {
-				if ( self::ping_external_url( $monitor['wpos_url'], $monitor['wpos_valid_response_code'] ) ) {
-					self::write_to_log( $monitor, 1 );
-				} else {
+				if ( ! self::ping_external_url( $monitor->url, $monitor->response_code ) ) {
 					self::write_to_log( $monitor, 0 );
 				}
 			}
@@ -240,17 +259,18 @@ class WP_Operational_Status_Admin {
 	/**
 	 * Write status to log table.
 	 */
-	public function write_to_log( $monitor = array(), $status = 0 ) {
-		if ( ! is_array( $monitor ) ) {
+	public function write_to_log( $monitor = null, $status = 0 ) {
+		if ( empty( $monitor ) ) {
 			return false;
 		}
 
 		global $wpdb;
+		$wpdb->operational_status_log = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_log';
 
 		$wpdb->insert(
-			$wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE,
+			$wpdb->operational_status_log,
 			array(
-				'monitor_url'      => $monitor['wpos_url'],
+				'monitor_id'       => intval( $monitor->id ),
 				'date_time'        => current_time( 'mysql', 1 ),
 				'status'           => $status,
 			),
@@ -297,6 +317,9 @@ class WP_Operational_Status_Admin {
 		}
 	}
 
+	/**
+	 * Print table row.
+	 */
 	private function print_table_row( $monitor ) {
 		$delete_nonce = wp_create_nonce( 'wp-operational-status-delete-monitor-' . $monitor->id );
 		?>
@@ -325,7 +348,10 @@ class WP_Operational_Status_Admin {
 		<?php
 	}
 
-	public function output_existing_menu_sub_admin_page() {
+	/**
+	 * Output admin menu page.
+	 */
+	public function output_admin_page() {
 		$monitors = $this->get_monitors();
 		?>
 			<div class="wrap">

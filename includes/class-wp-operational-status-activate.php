@@ -13,6 +13,8 @@ class WP_Operational_Status_Activate {
 	}
 
 	public static function plugin_activated() {
+		add_option( 'wpos_cron_last_run', '' , '', 'no' );
+
 		self::create_log_table();
 	}
 
