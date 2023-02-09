@@ -10,7 +10,9 @@ class WP_Operational_Status_Helpers {
 	 * Return monitors.
 	 */
 	public static function get_monitors() {
-		return carbon_get_theme_option( 'wpos_monitors' );
+		// return carbon_get_theme_option( 'wpos_monitors' );
+
+		return false;
 	}
 
 	/**

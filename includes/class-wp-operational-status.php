@@ -54,10 +54,11 @@ class WP_Operational_Status {
 	private function define_admin_hooks() {
 		$plugin_admin = new WP_Operational_Status_Admin( $this->get_plugin_name(), $this->get_version() );
 
-		$this->loader->add_action( 'after_setup_theme', $plugin_admin, 'load_carbon_fields' );
-		$this->loader->add_action( 'carbon_fields_register_fields', $plugin_admin, 'add_plugin_settings_page' );
 		$this->loader->add_action( 'init', $plugin_admin, 'register_cron_job' );
 		$this->loader->add_action( 'wp_operational_status_refresh', $plugin_admin, 'run_wp_operational_status_refresh' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_settings_page' );
+		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'admin_scripts' );
+		$this->loader->add_action( 'wp_ajax_wp_operational_status_admin', $plugin_admin, 'admin_actions_ajax' );
 	}
 
 	/**
