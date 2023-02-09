@@ -52,6 +52,8 @@ if ( ! function_exists( 'wpos_get_monitors' ) ) {
 			// If the last log is older than the cron interval, then the monitor is up.
 			if ( isset( $last_log ) && ! empty( $last_log ) && strtotime( $cron_last_run ) >  strtotime( $last_log->date_time ) ) {
 				$status = 1;
+			} else {
+				$status = 1;
 			}
 
 			$return[] = array(
