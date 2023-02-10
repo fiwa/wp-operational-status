@@ -111,16 +111,20 @@ class WP_Operational_Status_Admin {
 		$monitor = $this->get_monitor( $params['url'] );
 
 		$wpdb->operational_status_monitors = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_monitors';
+		$wpdb->operational_status_log = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_log';
 
-		$delete_sql = $wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->operational_status_monitors WHERE url = %s", $params['url'] ) );
+		$delete_monitor_sql = $wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->operational_status_monitors WHERE url = %s", $params['url'] ) );
+		$delete_monitor_logs_sql = $wpdb->query( $wpdb->prepare( "DELETE FROM $wpdb->operational_status_log WHERE monitor_id = %d", $monitor->id ) );
 
-		if ( $delete_sql ) {
+		if ( $delete_monitor_sql && $delete_monitor_logs_sql ) {
 			return array(
 				'success'             => __( 'Monitor deleted', 'wp-operational-status' ),
 				'deleted_monitor'     => $monitor,
 			);
 		} else {
-			return array( 'error' => __( 'Error deleting monitor', 'wp-operational-status' ) );
+			return array(
+				'error'               => __( 'Error deleting monitor', 'wp-operational-status' )
+			);
 		}
 	}
 
@@ -359,7 +363,7 @@ class WP_Operational_Status_Admin {
 					<?php _e( 'WP Operational Status', 'wp-operational-status' ); ?>
 				</h1>
 
-				<div id="<?php printf( '%s-js-messages', $this->plugin_name ); ?>" style="display: none; padding: 10px;"></div>
+				<div id="<?php printf( '%s-js-messages', $this->plugin_name ); ?>" style="display: none;"></div>
 
 				<h2>
 					<?php _e( 'Add monitor', 'wp-operational-status' ); ?>
@@ -375,7 +379,7 @@ class WP_Operational_Status_Admin {
 						<tbody>
 							<tr>
 								<th scope="row" style="width: 20%">
-									<label for="monitor_url">URL</label>
+									<label for="monitor_url"><?php _e( 'URL', 'wp-operational-status' ); ?></label>
 								</th>
 								<td style="width: 80%">
 									<input
@@ -387,7 +391,7 @@ class WP_Operational_Status_Admin {
 							</tr>
 							<tr>
 								<th scope="row" style="width: 20%">
-									<label for="monitor_name">Name</label>
+									<label for="monitor_name"><?php _e( 'Name', 'wp-operational-status' ); ?></label>
 								</th>
 								<td style="width: 80%">
 									<input
@@ -399,7 +403,7 @@ class WP_Operational_Status_Admin {
 							</tr>
 							<tr>
 								<th scope="row" style="width: 20%">
-									<label for="monitor_reponse_code">Valid response code</label>
+									<label for="monitor_reponse_code"><?php _e( 'Valid response code', 'wp-operational-status' ); ?></label>
 								</th>
 								<td style="width: 80%">
 									<input

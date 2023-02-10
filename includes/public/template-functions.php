@@ -42,18 +42,20 @@ if ( ! function_exists( 'wpos_get_monitors' ) ) {
 		$cron_interval = array_key_exists($cron_schedule, $cron_schedules) ? $cron_schedules[$cron_schedule]['interval'] : 0;
 
 		foreach ( $monitors as $monitor ) {
-			$status = 0;
+			$status = 1;
 			$monitor_logs = array_filter( $logs, function( $log ) use ( $monitor ) {
 				return $log->monitor_id === $monitor->id;
 			} );
 
 			$last_log = array_shift( $monitor_logs );
 
-			// If the last log is older than the cron interval, then the monitor is up.
-			if ( isset( $last_log ) && ! empty( $last_log ) && strtotime( $cron_last_run ) >  strtotime( $last_log->date_time ) ) {
-				$status = 1;
-			} else {
-				$status = 1;
+			// If the last log is older than the cron run, then the monitor is up.
+			if ( isset( $last_log ) && ! empty( $last_log ) ) {
+				if ( strtotime( $cron_last_run ) >  strtotime( $last_log->date_time )) {
+					$status = 1;
+				} else {
+					$status = 0;
+				}
 			}
 
 			$return[] = array(
