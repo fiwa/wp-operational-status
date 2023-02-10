@@ -39,7 +39,7 @@
 	var wpOperationalStatus = {
 		showMessage: function( type, message ) {
 			$( '#wp-operational-status-js-messages' )
-				.text( message )
+				.html( '<p>' + message + '</p>' )
 				.removeClass()
 				.addClass( 'updated fade ' + type  )
 				.show();
