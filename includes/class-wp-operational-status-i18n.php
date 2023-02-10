@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Define the internationalization functionality.
+ */
 class WP_Operational_Status_i18n {
 
 	/**
