@@ -358,6 +358,9 @@ class WP_Operational_Status_Admin {
 				<h1>
 					<?php _e( 'WP Operational Status', 'wp-operational-status' ); ?>
 				</h1>
+
+				<div id="<?php printf( '%s-js-messages', $this->plugin_name ); ?>" style="display: none; padding: 10px;"></div>
+
 				<h2>
 					<?php _e( 'Add monitor', 'wp-operational-status' ); ?>
 				</h2>
