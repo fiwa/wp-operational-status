@@ -1,8 +1,9 @@
 (function ($) {
-	var wpOperationalStatusAddMonitor =  $( '#wp-operational-status-add-monitor' ),
+	var body = $( 'body' ),
+		wpOperationalStatusAddMonitor =  $( '#wp-operational-status-add-monitor' ),
 		wpOperationalStatusAddMonitorTable = $( '#wp-operational-status-current-monitors' );
 
-	wpOperationalStatusAddMonitor.on( 'submit', function(e) {
+	wpOperationalStatusAddMonitor.on( 'submit', function( e ) {
 		e.preventDefault();
 
 		var wpOperationalStatusAddMonitorPost = {
@@ -18,7 +19,7 @@
 		}
 	});
 
-	$('a.delete', wpOperationalStatusAddMonitorTable).on( 'click', function(e) {
+	body.on( 'click', '#wp-operational-status-current-monitors a.delete', function( e ) {
 		e.preventDefault();
 
 		var wpOperationalStatusAddMonitorPost = {
@@ -36,6 +37,14 @@
 	});
 
 	var wpOperationalStatus = {
+		showMessage: function( type, message ) {
+			$( '#wp-operational-status-js-messages' )
+				.text( message )
+				.removeClass()
+				.addClass( 'updated fade ' + type  )
+				.show();
+		},
+
 		validate: function( wpOperationalStatusAddMonitorPost ) {
 			if ( '' === wpOperationalStatusAddMonitorPost.nonce.trim() ) {
 				alert( wpOperationalStatusAdminScriptL10n.empty_nonce );
@@ -45,6 +54,7 @@
 		},
 
 		addMonitor: function( wpOperationalStatusAddMonitorPost ) {
+			var self = this;
 			var add_ajax = $.ajax({
 				type: 'post',
 				dataType : 'json',
@@ -57,10 +67,17 @@
 				cache: false
 			}).done( function( data ) {
 				if ( data.success ) {
+					self.showMessage( 'success', data.success );
+
 					$( data.html ).hide().prependTo( $( 'tbody', wpOperationalStatusAddMonitorTable) ).fadeIn();
+
+					// Reset form
+					wpOperationalStatusAddMonitor[0].reset();
+				} else {
+					self.showMessage( 'error', data.error );
 				}
 			}).fail( function( jqXHR, textStatus, errorThrown ) {
-				console.log( errorThrown );
+				self.showMessage( 'error', errorThrown );
 			});
 
 			// Return promise
@@ -68,6 +85,7 @@
 		},
 
 		deleteMonitor: function( wpOperationalStatusAddMonitorPost ) {
+			var self = this;
 			var delete_ajax = $.ajax({
 				type: 'post',
 				dataType : 'json',
@@ -79,6 +97,8 @@
 				cache: false
 			}).done( function( data ) {
 				if ( data.success ) {
+					self.showMessage( 'success', data.success );
+
 					var deleteMonitor = $( '#monitor-' + data.deleted_monitor.id );
 
 					if ( deleteMonitor.length ) {
@@ -86,9 +106,11 @@
 							this.remove();
 						});
 					}
+				} else {
+					self.showMessage( 'error', data.error );
 				}
 			}).fail( function( jqXHR, textStatus, errorThrown ) {
-				console.log( errorThrown );
+				self.showMessage( 'error', errorThrown );
 			});
 
 			// Return promise
