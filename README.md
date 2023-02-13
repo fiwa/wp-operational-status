@@ -25,14 +25,26 @@ Add monitors in the WP Operational Status theme options page.
 
 ##### Parameters
 
-**number_of_posts** *int Optional*
+**limit** *int Optional*
  
- Default: `10`
+ Default: `null`
 
 ```php
 $monitors = wpos_get_monitors(
   array(
-    'number_of_posts' => '15,
+    'limit' => '15,
+  ),
+)
+```
+
+**date** *string Optional*
+ 
+ Default: `null`
+
+```php
+$monitors = wpos_get_monitors(
+  array(
+    'date' => '2022-01-01,
   ),
 )
 ```

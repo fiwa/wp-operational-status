@@ -4,7 +4,7 @@
  * Plugin Name:       WP Operational Status
  * Plugin URI:        https://github.com/fiwa/wp-operational-status
  * Description:       A plugin that logs the operational status of one or more websites.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Author:            Filip Wastman
  * Author URI:        https://aventyret.com
  * Text Domain:       wp-operational-status
@@ -19,7 +19,7 @@ if ( ! defined( 'WPINC' ) ) {
 /**
  * Plugin constants.
  */
-define( 'WP_OPERAIONAL_STATUS_VERSION', '0.1.0' );
+define( 'WP_OPERAIONAL_STATUS_VERSION', '0.2.0' );
 define( 'WP_OPERAIONAL_STATUS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WP_OPERAIONAL_STATUS_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 define( 'WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX', 'operational_status' );
