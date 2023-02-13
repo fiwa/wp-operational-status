@@ -63,18 +63,17 @@ class WP_Operational_Status_Helpers {
 
 		$sql_args = array_filter( wp_list_pluck( $sql_parts, 'arg' ) );
 
-		$result = $wpdb->get_results(
-			$wpdb->prepare(
-				$sql,
-				$sql_args
-			)
-		);
+		if ( count( $sql_args ) < 1 ) {
+			$result = $wpdb->get_results( $sql );
+		} else {
+			$result = $wpdb->get_results(
+				$wpdb->prepare(
+					$sql,
+					$sql_args
+				)
+			);
+		}
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
-				$sql,
-				$sql_args
-			)
-		);
+		return $result;
 	}
 }
