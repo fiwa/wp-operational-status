@@ -21,6 +21,10 @@ class WP_Operational_Status_Admin {
 	 * Add plugin settings page.
 	 */
 	public function add_plugin_settings_page() {
+		if (is_multisite() && get_current_blog_id() !== 1) {
+			return;
+		}
+
 		add_menu_page(
 			__( 'WP Operational Status', 'wp-operational-status' ),
 			__( 'WP Operational Status', 'wp-operational-status' ),
@@ -212,7 +216,16 @@ class WP_Operational_Status_Admin {
 	 */
 	public static function get_monitors() {
 		global $wpdb;
-		$wpdb->operational_status_monitors = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_monitors';
+		$wpdb_prefix = $wpdb->prefix;
+
+		if (is_multisite()) {
+			$main_blog_id = WP_Operational_Status_Helpers::get_main_blog_id();
+			$main_blog_db_prefix = $wpdb->get_blog_prefix($main_blog_id);
+			$wpdb_prefix = $main_blog_db_prefix;
+		}
+
+		$wpdb->operational_status_monitors = $wpdb_prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_monitors';
+
 		return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $wpdb->operational_status_monitors ORDER BY id DESC LIMIT %d", 10 ) );
 	}
 

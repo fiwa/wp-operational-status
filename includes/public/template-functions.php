@@ -23,9 +23,10 @@ if ( ! function_exists( 'wpos_get_monitors' ) ) {
 		$logs = WP_Operational_Status_Helpers::get_operational_status_logs( $args );
 
 		$cron_last_run = get_option( 'wpos_cron_last_run' );
-		$cron_schedule = wp_get_schedule( 'wp_operational_status_refresh' );
-		$cron_schedules = wp_get_schedules();
-		$cron_interval = array_key_exists( $cron_schedule, $cron_schedules ) ? $cron_schedules[$cron_schedule]['interval'] : 0;
+		if (is_multisite()) {
+			$main_blog_id = WP_Operational_Status_Helpers::get_main_blog_id();
+			$cron_last_run = get_blog_option( $main_blog_id, 'wpos_cron_last_run' );
+		}
 
 		foreach ( $monitors as $monitor ) {
 			$monitor_logs = array();
