@@ -11,6 +11,13 @@ class WP_Operational_Status_Helpers {
 	 */
 	public static function get_operational_status_logs( $args = null ) {
 		global $wpdb;
+		$wpdb_prefix = $wpdb->prefix;
+
+		if (is_multisite()) {
+			$main_blog_id = self::get_main_blog_id();
+			$main_blog_db_prefix = $wpdb->get_blog_prefix( $main_blog_id );
+			$wpdb_prefix = $main_blog_db_prefix;
+		}
 
 		$default_args = array(
 			'date' => null,
@@ -53,7 +60,7 @@ class WP_Operational_Status_Helpers {
 			}
 		}
 
-		$wpdb->operational_status_log = $wpdb->prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_log';
+		$wpdb->operational_status_log = $wpdb_prefix . WP_OPERAIONAL_STATUS_DB_TABLE_PREFIX . '_log';
 
 		$sql = sprintf(
 			"SELECT * FROM $wpdb->operational_status_log %s ORDER BY id DESC %s",
@@ -76,4 +83,16 @@ class WP_Operational_Status_Helpers {
 
 		return $result;
 	}
+
+	/**
+	 * Return main blog id.
+	 *
+	 * @param int.
+	 */
+	public static function get_main_blog_id () {
+		global $current_site;
+		global $wpdb;
+
+		return $wpdb->get_var ( $wpdb->prepare ( "SELECT `blog_id` FROM `$wpdb->blogs` WHERE `domain` = '%s' AND `path` = '%s' ORDER BY `blog_id` ASC LIMIT 1", $current_site->domain, $current_site->path ) );
+	  }
 }
